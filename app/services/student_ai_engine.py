@@ -15,13 +15,7 @@ genai.configure(
     )
 
 )
-'''
-genai.configure(
 
-    api_key="AIzaSyBJNUduVhjGx9FIYXwL8o7ZaDRB3e99_UE"
-
-)
-'''
 model = genai.GenerativeModel(
     "gemini-2.5-flash"
 )

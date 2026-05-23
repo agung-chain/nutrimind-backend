@@ -1,4 +1,4 @@
-from google import genai
+from google.generativeai import genai
 from dotenv import load_dotenv
 import os
 
@@ -12,6 +12,19 @@ client = genai.Client(
     api_key=os.getenv("GOOGLE_API_KEY")
 )
 
+genai.configure(
+    api_key=os.getenv("GOOGLE_API_KEY")
+)
+
+model = genai.GenerativeModel(
+    "gemini-2.5-flash"
+)
+
+response = model.generate_content(
+    "hello"
+)
+
+print(response.text)
 # =========================
 # LOCAL AI FALLBACK
 # =========================
