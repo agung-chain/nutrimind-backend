@@ -15,11 +15,6 @@ model = genai.GenerativeModel(
     "gemini-2.5-flash"
 )
 
-response = model.generate_content(
-    "hello"
-)
-
-print(response.text)
 # =========================
 # LOCAL AI FALLBACK
 # =========================
