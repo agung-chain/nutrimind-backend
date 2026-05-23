@@ -7,11 +7,6 @@ load_dotenv()
 # =========================
 # GEMINI CLIENT
 # =========================
-
-client = genai.Client(
-    api_key=os.getenv("GOOGLE_API_KEY")
-)
-
 genai.configure(
     api_key=os.getenv("GOOGLE_API_KEY")
 )
