@@ -1,23 +1,29 @@
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 import os
+import random
 
 load_dotenv()
 
 # =========================
 # GEMINI CLIENT
 # =========================
-genai.configure(
-    api_key=os.getenv("GOOGLE_API_KEY")
+
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 
-model = genai.GenerativeModel(
-    "gemini-2.5-flash"
-)
+# =========================
+# RANDOM RESPONSE HELPER
+# =========================
+
+def pick(options):
+    return random.choice(options)
 
 # =========================
 # LOCAL AI FALLBACK
 # =========================
+
 def local_ai_analysis(student_data):
 
     advice = []
@@ -30,241 +36,311 @@ def local_ai_analysis(student_data):
     exercise = student_data["exercise_minutes"]
     stress = student_data["stress_level"]
 
+    water = student_data.get("water_intake", 0)
+    breakfast = student_data.get("breakfast", False)
+
     # =========================
-    # ANALISA BMI
+    # OPENING
+    # =========================
+
+    advice.append(
+        pick([
+            "📊 Berikut analisa kesehatan siswa hari ini.",
+            "🧠 Sistem wellness mendeteksi kondisi siswa sebagai berikut.",
+            "📈 AI menemukan beberapa pola penting dari check-in siswa."
+        ])
+    )
+
+    # =========================
+    # BMI ANALYSIS
     # =========================
 
     if bmi < 18.5:
 
         advice.append(
-            "⚠️ Kondisi berat badan siswa tergolong di bawah normal. "
-            "Siswa berpotensi mengalami kekurangan asupan energi dan protein."
+            pick([
+                "⚠️ BMI berada di bawah normal sehingga siswa berpotensi kekurangan energi.",
+                "🍚 Berat badan siswa masih tergolong kurang dan perlu peningkatan nutrisi.",
+                "🥛 Sistem mendeteksi kemungkinan kurang asupan protein dan kalori."
+            ])
         )
 
         advice.append(
-            "🍗 Rekomendasi gizi: tambahkan protein seperti telur, ayam, ikan, tempe, tahu, dan susu."
+            pick([
+                "🍗 Tambahkan telur, susu, ikan, tempe, dan buah.",
+                "🥚 Disarankan konsumsi protein lebih rutin setiap hari.",
+                "🍌 Menu tinggi energi sehat sangat dianjurkan."
+            ])
         )
 
     elif bmi > 25:
 
         advice.append(
-            "⚠️ Berat badan siswa tergolong berlebih. "
-            "Perlu pengaturan pola makan dan aktivitas fisik."
+            pick([
+                "⚠️ BMI berada di atas normal.",
+                "🍟 Berat badan siswa tergolong berlebih.",
+                "🥤 AI mendeteksi risiko pola makan kurang sehat."
+            ])
         )
 
         advice.append(
-            "🥗 Kurangi makanan tinggi gula dan gorengan. "
-            "Perbanyak sayur, buah, dan aktivitas olahraga."
-        )
-
-    else:
-
-        advice.append(
-            "✅ BMI siswa berada pada kategori normal."
-        )
-
-    # =========================
-    # ANALISA TIDUR
-    # =========================
-
-    if sleep < 6:
-
-        advice.append(
-            "😴 Jam tidur siswa sangat kurang. "
-            "Kurang tidur dapat menurunkan fokus belajar dan kesehatan mental."
-        )
-
-    elif sleep < 8:
-
-        advice.append(
-            "🛌 Jam tidur siswa masih kurang optimal. "
-            "Disarankan tidur lebih awal untuk mendukung pertumbuhan."
+            pick([
+                "🥗 Kurangi minuman manis dan gorengan.",
+                "🏃 Tingkatkan aktivitas fisik harian.",
+                "🍎 Perbanyak sayur, buah, dan air putih."
+            ])
         )
 
     else:
 
         advice.append(
-            "🌙 Pola tidur siswa cukup baik."
+            pick([
+                "✅ BMI siswa berada pada kategori ideal.",
+                "💪 Berat badan siswa cukup seimbang.",
+                "🌟 Kondisi fisik siswa relatif stabil."
+            ])
         )
 
     # =========================
-    # ANALISA STRESS
+    # MOOD ANALYSIS
     # =========================
 
-    if stress >= 8:
+    if mood <= 3:
 
         advice.append(
-            "🚨 Tingkat stres siswa sangat tinggi. "
-            "Perlu perhatian dari orang tua atau guru BK."
-        )
-
-    elif stress >= 5:
-
-        advice.append(
-            "⚠️ Siswa mulai menunjukkan tingkat stres sedang."
-        )
-
-    else:
-
-        advice.append(
-            "😊 Tingkat stres siswa relatif stabil."
-        )
-
-    # =========================
-    # ANALISA MOOD
-    # =========================
-
-    if mood <= 4:
-
-        advice.append(
-            "💭 Mood siswa rendah. "
-            "Perlu dukungan sosial, aktivitas menyenangkan, dan komunikasi positif."
+            pick([
+                "😟 Mood siswa sangat rendah hari ini.",
+                "💭 Emosi siswa tampak kurang stabil.",
+                "🫤 Siswa terlihat mengalami penurunan semangat."
+            ])
         )
 
     elif mood <= 7:
 
         advice.append(
-            "🙂 Kondisi emosional siswa cukup baik."
+            pick([
+                "🙂 Mood siswa cukup baik.",
+                "😊 Kondisi emosional relatif stabil.",
+                "🌤️ Siswa berada dalam kondisi emosi sedang."
+            ])
         )
 
     else:
 
         advice.append(
-            "😄 Mood siswa sangat baik dan positif."
+            pick([
+                "😄 Mood siswa sangat positif.",
+                "🌈 Kondisi emosional siswa sangat baik.",
+                "✨ Semangat dan suasana hati siswa terlihat bagus."
+            ])
         )
 
     # =========================
-    # ANALISA OLAHRAGA
+    # SLEEP ANALYSIS
+    # =========================
+
+    if sleep < 6:
+
+        advice.append(
+            pick([
+                "😴 Jam tidur sangat kurang.",
+                "🌙 Kurang tidur dapat memengaruhi fokus belajar.",
+                "🛌 AI mendeteksi pola tidur tidak sehat."
+            ])
+        )
+
+    elif sleep < 8:
+
+        advice.append(
+            pick([
+                "🛏️ Tidur cukup tetapi belum optimal.",
+                "🌜 Waktu tidur siswa masih bisa ditingkatkan.",
+                "💤 Kualitas istirahat cukup baik."
+            ])
+        )
+
+    else:
+
+        advice.append(
+            pick([
+                "🌙 Pola tidur siswa sangat baik.",
+                "😴 Waktu istirahat cukup untuk mendukung pertumbuhan.",
+                "💤 Sistem mendeteksi kualitas tidur yang sehat."
+            ])
+        )
+
+    # =========================
+    # STRESS ANALYSIS
+    # =========================
+
+    if stress >= 8:
+
+        advice.append(
+            pick([
+                "🚨 Tingkat stres sangat tinggi.",
+                "⚠️ Siswa membutuhkan perhatian emosional tambahan.",
+                "🧠 Risiko kelelahan mental cukup tinggi."
+            ])
+        )
+
+    elif stress >= 5:
+
+        advice.append(
+            pick([
+                "⚠️ Tingkat stres sedang.",
+                "📚 Siswa mulai mengalami tekanan aktivitas.",
+                "🧠 Beban mental siswa perlu dipantau."
+            ])
+        )
+
+    else:
+
+        advice.append(
+            pick([
+                "😊 Tingkat stres relatif stabil.",
+                "🌿 Kondisi mental siswa cukup baik.",
+                "🧘 Siswa terlihat cukup tenang."
+            ])
+        )
+
+    # =========================
+    # EXERCISE ANALYSIS
     # =========================
 
     if exercise < 20:
 
         advice.append(
-            "🏃 Aktivitas fisik siswa masih sangat kurang."
+            pick([
+                "🏃 Aktivitas fisik masih sangat kurang.",
+                "🚶 Tubuh membutuhkan lebih banyak gerakan aktif.",
+                "⚡ Siswa disarankan lebih rutin berolahraga."
+            ])
         )
 
     elif exercise < 45:
 
         advice.append(
-            "🚶 Aktivitas fisik siswa cukup, tetapi masih bisa ditingkatkan."
+            pick([
+                "💪 Aktivitas fisik cukup baik.",
+                "🏃 Siswa cukup aktif bergerak.",
+                "🚴 Olahraga siswa sudah lumayan bagus."
+            ])
         )
 
     else:
 
         advice.append(
-            "💪 Aktivitas fisik siswa sangat baik."
+            pick([
+                "🔥 Aktivitas fisik sangat baik.",
+                "💯 Siswa sangat aktif hari ini.",
+                "🏆 Kebiasaan olahraga siswa sangat positif."
+            ])
         )
 
     # =========================
-    # REKOMENDASI MBG
+    # WATER ANALYSIS
     # =========================
 
-    advice.append(
-        "🍱 Rekomendasi Menu MBG Hari Ini:"
-    )
+    if water < 4:
+
+        advice.append(
+            pick([
+                "💧 Konsumsi air masih sangat kurang.",
+                "🚰 Tubuh membutuhkan lebih banyak cairan.",
+                "🥤 Risiko dehidrasi ringan terdeteksi."
+            ])
+        )
+
+    elif water < 7:
+
+        advice.append(
+            pick([
+                "💦 Konsumsi air cukup baik.",
+                "🚰 Hidrasi siswa lumayan stabil.",
+                "🥛 Asupan cairan cukup tetapi bisa ditingkatkan."
+            ])
+        )
+
+    else:
+
+        advice.append(
+            pick([
+                "💧 Hidrasi siswa sangat baik.",
+                "🌊 Konsumsi air harian sudah ideal.",
+                "🚰 Tubuh siswa terhidrasi dengan baik."
+            ])
+        )
+
+    # =========================
+    # BREAKFAST ANALYSIS
+    # =========================
+
+    if breakfast:
+
+        advice.append(
+            pick([
+                "🍞 Sarapan membantu menjaga fokus belajar.",
+                "🥣 Kebiasaan sarapan siswa sangat baik.",
+                "🍳 Energi pagi siswa tercukupi."
+            ])
+        )
+
+    else:
+
+        advice.append(
+            pick([
+                "⚠️ Siswa tidak sarapan hari ini.",
+                "🍞 Melewatkan sarapan dapat menurunkan konsentrasi.",
+                "🥐 Sistem menyarankan sarapan sehat sebelum sekolah."
+            ])
+        )
+
+    # =========================
+    # MBG RECOMMENDATION
+    # =========================
+
+    advice.append("\n🍱 Rekomendasi Menu MBG:")
 
     if bmi < 18.5:
 
         advice.append(
-            "- Nasi\n- Telur\n- Tempe\n- Sayur bayam\n- Susu\n- Pisang"
+            pick([
+                "- Nasi\n- Ayam\n- Telur\n- Tempe\n- Susu\n- Pisang",
+                "- Nasi\n- Ikan\n- Sayur bayam\n- Susu\n- Buah",
+                "- Nasi\n- Telur rebus\n- Tahu\n- Sayur hijau\n- Susu"
+            ])
         )
 
     elif bmi > 25:
 
         advice.append(
-            "- Nasi secukupnya\n- Ikan panggang\n- Sayur hijau\n- Buah segar\n- Air putih"
+            pick([
+                "- Nasi secukupnya\n- Ikan panggang\n- Sayur hijau\n- Buah",
+                "- Sup sayur\n- Ayam rebus\n- Air putih",
+                "- Oatmeal\n- Telur\n- Salad buah"
+            ])
         )
 
     else:
 
         advice.append(
-            "- Nasi\n- Ayam\n- Sayur\n- Buah\n- Susu"
+            pick([
+                "- Nasi\n- Ayam\n- Sayur\n- Buah\n- Susu",
+                "- Nasi\n- Ikan\n- Tempe\n- Sayur hijau",
+                "- Nasi\n- Telur\n- Sayur sop\n- Buah"
+            ])
         )
 
     # =========================
-    # KESIMPULAN
+    # FINAL SUMMARY
     # =========================
 
     advice.append(
-        "\n📊 Sistem AI menyarankan pemantauan rutin setiap minggu "
-        "untuk melihat perkembangan kesehatan fisik dan mental siswa."
-    )
-
-    return "\n\n".join(advice)
-
-def local_ai_analysis2(student_data):
-
-    advice = []
-
-    bmi = student_data["bmi"]["bmi"]
-
-    mood = student_data["mood"]
-    sleep = student_data["sleep_hours"]
-    exercise = student_data["exercise_minutes"]
-    stress = student_data["stress_level"]
-    
-    # BMI
-    if bmi < 18.5:
-
-        advice.append(
-            "⚠️ Berat badan siswa di bawah normal."
-        )
-
-        advice.append(
-            "🍗 Tambahkan protein dan susu."
-        )
-
-    elif bmi > 25:
-
-        advice.append(
-            "⚠️ Berat badan siswa berlebih."
-        )
-
-        advice.append(
-            "🥗 Kurangi gula dan gorengan."
-        )
-
-    else:
-
-        advice.append(
-            "✅ BMI siswa normal."
-        )
-
-    # Sleep
-    if sleep < 7:
-
-        advice.append(
-            "😴 Jam tidur siswa kurang."
-        )
-
-    # Stress
-    if stress >= 7:
-
-        advice.append(
-            "🚨 Tingkat stres siswa tinggi."
-        )
-
-    # Mood
-    if mood <= 4:
-
-        advice.append(
-            "💭 Mood siswa rendah."
-        )
-
-    # Exercise
-    if exercise < 30:
-
-        advice.append(
-            "🏃 Aktivitas fisik siswa kurang."
-        )
-
-    # MBG
-    advice.append(
-        "🍱 Rekomendasi MBG: nasi, telur, tempe, sayur, susu."
+        "\n📌 Sistem menyarankan pemantauan rutin mingguan untuk melihat perkembangan kesehatan siswa."
     )
 
     advice.append(
-        "\n🤖 Analisa menggunakan Local NutriMind AI."
+        "🤖 Analisa dibuat menggunakan Local Wellness AI."
     )
 
     return "\n\n".join(advice)
@@ -278,26 +354,52 @@ def generate_health_advice(student_data):
     try:
 
         prompt = f"""
-        Anda adalah AI kesehatan sekolah Indonesia.
+Anda adalah AI wellness, nutrition, dan mental health assistant
+untuk siswa sekolah Indonesia.
 
-        Analisa data siswa berikut:
+Tugas:
+- analisa kesehatan siswa
+- gunakan bahasa sederhana
+- jangan terlalu medis
+- hangat dan suportif
+- maksimal 300 kata
+- gunakan emoji seperlunya
+- fokus pada:
+  * fisik
+  * mental
+  * pola hidup
+  * nutrisi
+  * hidrasi
+  * sarapan
+  * aktivitas sekolah
 
-        Nama: {student_data["name"]}
-        Umur: {student_data["age"]}
-        BMI: {student_data["bmi"]["bmi"]}
-        Kategori BMI: {student_data["bmi"]["category"]}
-        Mood: {student_data["mood"]}
-        Jam tidur: {student_data["sleep_hours"]}
-        Olahraga: {student_data["exercise_minutes"]}
-        Stress: {student_data["stress_level"]}
+DATA SISWA
 
-        Berikan:
-        1. Analisa kesehatan fisik
-        2. Analisa mental
-        3. Saran untuk sekolah
-        4. Saran untuk orang tua
-        5. Rekomendasi menu MBG
-        """
+Nama: {student_data["name"]}
+Umur: {student_data["age"]}
+
+BMI: {student_data["bmi"]["bmi"]}
+Kategori BMI: {student_data["bmi"]["category"]}
+
+Mood: {student_data["mood"]}
+Tidur: {student_data["sleep_hours"]}
+Olahraga: {student_data["exercise_minutes"]}
+Stress: {student_data["stress_level"]}
+
+Minum Air: {student_data.get("water_intake", 0)}
+Sarapan: {student_data.get("breakfast", False)}
+
+Berikan output dengan format:
+
+📊 Kondisi Umum
+🧠 Mental & Emosi
+💪 Fisik & Aktivitas
+💧 Hidrasi & Nutrisi
+🏫 Saran Sekolah
+👨‍👩‍👧 Saran Orang Tua
+🍱 Rekomendasi Makanan Bergizi
+📌 Kesimpulan
+"""
 
         response = client.models.generate_content(
             model="gemini-2.5-flash",

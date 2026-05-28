@@ -1,23 +1,17 @@
 from app.database import db
 
-import google.generativeai as genai
-
-# 🔥 GEMINI CONFIG
+from google import genai
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
-genai.configure(
+# =========================
+# GEMINI CLIENT
+# =========================
 
-    api_key=os.getenv(
-        "GEMINI_API_KEY"
-    )
-
-)
-
-model = genai.GenerativeModel(
-    "gemini-2.5-flash"
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 
 
@@ -124,11 +118,13 @@ def local_ai_analysis(
 
 def gemini_ai_analysis(prompt):
 
-    response = model.generate_content(
-        prompt
+    response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt
     )
 
     return response.text
+
 
 
 # =========================================

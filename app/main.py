@@ -571,3 +571,57 @@ def student_ai(student_uid: str):
         "data": result
     }
 
+@app.get("/user/{email}")
+def get_user(email: str):
+    user = db.users.find_one({"email": email})
+
+    if not user:
+        return {"error": "user not found"}
+
+    user["_id"] = str(user["_id"])
+    return user
+
+
+@app.get("/checkin/{student_uid}")
+def get_latest_checkin(student_uid: str):
+
+    data = db.daily_checkins.find_one(
+        {"student_uid": student_uid},
+        sort=[("created_at", -1)]
+    )
+
+    if not data:
+        return {}
+
+    data["_id"] = str(data["_id"])
+
+    return data
+
+@app.post("/save-profile")
+def save_profile(data: dict):
+
+    # 🔥 AUTO GENERATE UID
+    student_uid = f"{data['school_code']}-{data['nis']}"
+
+    profile = {
+        "email": data["email"],
+        "student_uid": student_uid,
+        "school_code": data["school_code"],
+        "nis": data["nis"],
+        "name": data["name"],
+        "age": data["age"],
+        "height": data["height"],
+        "weight": data["weight"]
+    }
+
+    # upsert = update kalau ada, insert kalau belum ada
+    db.users.update_one(
+        {"email": data["email"]},
+        {"$set": profile},
+        upsert=True
+    )
+
+    return {
+        "success": True,
+        "student_uid": student_uid
+    }
